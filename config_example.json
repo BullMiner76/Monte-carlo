@@ -1,0 +1,11 @@
+{
+  "_comment": "Override defaults by name. Keys you omit fall back to defaults in monte_carlo.default_distributions().",
+  "gold_usd":    {"kind": "lognormal", "params": {"mean": 4496, "sigma": 0.22}, "clip": [500, 20000]},
+  "aud_usd":     {"kind": "triangular", "params": {"low": 0.62, "mode": 0.735, "high": 0.82}},
+  "cpi":         {"kind": "normal", "params": {"mean": 0.038, "std": 0.010}, "clip": [-0.01, 0.10]},
+  "base_aisc":   {"kind": "lognormal", "params": {"mean": 2400, "sigma": 0.08}},
+  "grade_recon": {"kind": "beta", "params": {"a": 6, "b": 4, "low": 0.50, "high": 0.95}},
+  "recovery_adj":{"kind": "beta", "params": {"a": 8, "b": 2, "low": 0.85, "high": 0.99}},
+  "cost_conf":   {"kind": "triangular", "params": {"low": 0.90, "mode": 1.00, "high": 1.15}},
+  "jurisdiction":{"kind": "beta", "params": {"a": 20, "b": 1.5, "low": 0.70, "high": 1.00}}
+}
