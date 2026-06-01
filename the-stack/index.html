@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0e0d0b" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>The Stack — Build the Chain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================== reset / tokens ============================== */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+:root{
+  --bg:#0e0d0b; --panel:#17150f; --panel2:#211d15; --panel3:#2b2519;
+  --ink:#ede6d6; --mut:#988e76; --faint:#6b6250;
+  --gold:#e6a92f; --gold2:#f4c869; --grn:#5bbd8a; --grn2:#7fe0ac;
+  --red:#e0664b; --line:rgba(237,230,214,.10); --line2:rgba(237,230,214,.06);
+  --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{
+  font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink);background:var(--bg);
+  background-image:radial-gradient(125% 65% at 50% -8%, rgba(230,169,47,.17), transparent 60%);
+  touch-action:manipulation;position:fixed;inset:0;
+}
+/* film grain */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.45;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+
+#app{position:fixed;inset:0;display:flex;justify-content:center}
+.scene{width:100%;max-width:480px;height:100%;position:relative;display:flex;flex-direction:column;
+  padding:calc(16px + var(--safe-t)) 16px calc(14px + var(--safe-b));z-index:1}
+
+/* mono helpers */
+.mono{font-family:'JetBrains Mono',monospace}
+.serif{font-family:'Fraunces',serif}
+
+/* ============================== header bits ============================== */
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.32em;color:var(--gold);text-transform:uppercase}
+.title{font-family:'Fraunces',serif;font-weight:600;font-size:46px;line-height:.92;letter-spacing:-.015em;margin-top:6px}
+.title em{font-style:italic;color:var(--gold2)}
+.sub{color:var(--mut);font-size:14.5px;line-height:1.5;margin-top:14px;max-width:30em}
+
+/* ============================== buttons ============================== */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:14px;cursor:pointer;
+  font-family:'Fraunces',serif;font-weight:600;font-size:17px;padding:15px 18px;transition:transform .08s ease, opacity .15s;color:#1a1407}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn.p{background:linear-gradient(180deg,var(--gold2),var(--gold));box-shadow:0 12px 30px -12px rgba(230,169,47,.7)}
+.btn.s{background:transparent;border:1px solid var(--line);color:var(--mut)}
+.btn.g{background:linear-gradient(180deg,var(--grn2),var(--grn));box-shadow:0 12px 30px -12px rgba(91,189,138,.6)}
+.btn:disabled{opacity:.4;pointer-events:none}
+.iconbtn{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:11px;width:42px;height:42px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;flex:0 0 auto}
+.iconbtn:active{border-color:var(--gold);color:var(--gold)}
+
+/* ============================== HOME / MAP ============================== */
+#home .top{display:flex;justify-content:space-between;align-items:flex-start}
+.statpill{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--mut);text-align:right;line-height:1.7}
+.statpill b{color:var(--gold);font-size:15px}
+.maplbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.28em;color:var(--mut);text-transform:uppercase;margin:22px 2px 12px;display:flex;justify-content:space-between}
+.map{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:11px;padding-bottom:10px;
+  mask-image:linear-gradient(180deg,transparent 0,#000 14px,#000 calc(100% - 18px),transparent 100%)}
+.lvl{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel);
+  padding:14px 16px;position:relative;overflow:hidden;transition:transform .08s,border-color .2s}
+.lvl:not(.locked){cursor:pointer}
+.lvl:not(.locked):active{transform:scale(.985);border-color:var(--gold)}
+.lvl.locked{opacity:.5}
+.lvl.done{border-color:rgba(91,189,138,.4)}
+.lvl::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(230,169,47,.10),transparent 55%);opacity:0;transition:opacity .2s}
+.lvl.done::after{background:linear-gradient(90deg,rgba(91,189,138,.10),transparent 55%);opacity:1}
+.lvl .idx{flex:0 0 44px;height:44px;border-radius:12px;background:var(--panel2);display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:var(--gold)}
+.lvl.done .idx{background:rgba(91,189,138,.14);color:var(--grn2)}
+.lvl.locked .idx{color:var(--faint)}
+.lvl .info{flex:1;min-width:0}
+.lvl .tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.lvl.locked .tag{color:var(--faint)}
+.lvl .nm{font-family:'Fraunces',serif;font-size:16.5px;line-height:1.2;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lvl .rt{flex:0 0 auto;text-align:right}
+.stars{font-size:13px;letter-spacing:1px;color:var(--faint)}
+.stars b{color:var(--gold2);font-weight:400}
+.lvl .lock{font-size:18px;color:var(--faint)}
+.lvl .play{font-size:22px;color:var(--gold)}
+
+/* ============================== GAME ============================== */
+#game{display:none}
+.gtop{display:flex;align-items:center;gap:10px}
+.gtop .ttl{flex:1;min-width:0}
+.gtop .tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase}
+.gtop .nm{font-family:'Fraunces',serif;font-size:18px;line-height:1.15;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.hud{display:flex;align-items:stretch;gap:8px;margin-top:13px}
+.hud .cell{flex:1;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:8px 10px;text-align:center}
+.hud .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.18em;color:var(--mut);text-transform:uppercase}
+.hud .v{font-family:'Fraunces',serif;font-weight:700;font-size:21px;line-height:1.1;margin-top:2px;font-variant-numeric:tabular-nums}
+.hud .v.gold{color:var(--gold2)}
+#combo.v{transition:transform .12s}
+.combo-pop{transform:scale(1.35)!important;color:var(--grn2)!important}
+.lives{display:flex;gap:4px;justify-content:center;font-size:16px;margin-top:3px;line-height:1}
+.life-lost{animation:lifeout .4s ease forwards}
+@keyframes lifeout{0%{transform:scale(1.4);filter:saturate(2)}100%{opacity:.18;transform:scale(.8)}}
+
+/* progress bar */
+.pbar{height:5px;border-radius:3px;background:var(--panel2);margin:13px 0 4px;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px;
+  transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.timebar{height:3px;border-radius:2px;background:var(--panel2);margin-bottom:10px;overflow:hidden}
+.timebar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--grn),var(--gold))}
+
+.goal{font-family:'Fraunces',serif;font-size:18px;line-height:1.25;margin:8px 2px 2px;color:var(--ink)}
+.prompt{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase;margin:4px 2px 10px}
+.prompt b{color:var(--gold)}
+
+/* stack (locked, correct lines) */
+.stack{display:flex;flex-direction:column;gap:7px;margin-bottom:8px}
+.slot{display:flex;align-items:center;gap:10px;border:1px solid rgba(91,189,138,.45);border-radius:13px;
+  background:linear-gradient(90deg,rgba(91,189,138,.13),rgba(91,189,138,.04));padding:0 12px;min-height:50px;
+  animation:lockin .4s cubic-bezier(.18,1.3,.4,1)}
+@keyframes lockin{0%{transform:scale(.7) translateY(-14px);opacity:0}60%{transform:scale(1.04)}100%{transform:none;opacity:1}}
+.slot .n{flex:0 0 22px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--grn2)}
+.slot .t{flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;line-height:1.3;padding:9px 0}
+.slot .chk{flex:0 0 auto;color:var(--grn2);font-size:15px}
+
+/* tray (cards still to place) */
+.trayhdr{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;color:var(--mut);text-transform:uppercase;margin:6px 2px 8px;display:flex;justify-content:space-between}
+.tray{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:9px;padding-bottom:6px;
+  mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 16px),transparent 100%)}
+.card{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;background:var(--panel);
+  padding:0 14px;min-height:56px;cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .1s ease, border-color .15s, background .15s}
+.card:active{transform:scale(.98)}
+.card .dot{flex:0 0 8px;height:8px;border-radius:50%;background:var(--panel3);box-shadow:inset 0 0 0 1px var(--line)}
+.card .t{flex:1;font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:500;line-height:1.32;padding:12px 0}
+.card .ar{flex:0 0 auto;color:var(--faint);font-size:17px;transition:color .15s, transform .15s}
+.card:active .ar{color:var(--gold);transform:translateX(2px)}
+.card.hintglow{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 22px -4px rgba(230,169,47,.8);
+  background:linear-gradient(90deg,rgba(230,169,47,.12),var(--panel))}
+.card.hintglow .dot{background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.card.wrong{animation:wrong .42s cubic-bezier(.36,.07,.19,.97);border-color:var(--red)!important;background:rgba(224,102,75,.1)!important}
+@keyframes wrong{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}
+.card.right{animation:rightflash .3s ease}
+@keyframes rightflash{0%{background:rgba(91,189,138,.3);border-color:var(--grn)}100%{background:var(--panel)}}
+
+/* floating combo / score popups */
+.fly{position:fixed;z-index:60;pointer-events:none;font-family:'Fraunces',serif;font-weight:700;font-size:24px;color:var(--gold2);
+  text-shadow:0 2px 12px rgba(0,0,0,.6);animation:fly 1s ease forwards}
+@keyframes fly{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1;transform:translate(-50%,-14px) scale(1.1)}
+  100%{opacity:0;transform:translate(-50%,-64px) scale(.9)}}
+
+.gbtns{display:flex;gap:9px;margin-top:8px}
+
+/* ============================== WIN OVERLAY ============================== */
+.overlay{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:22px;
+  background:rgba(7,6,4,.72);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.overlay.show{display:flex;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{width:100%;max-width:420px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,var(--panel2),var(--panel));
+  padding:26px 22px 22px;text-align:center;position:relative;animation:rise .35s cubic-bezier(.18,1.2,.4,1);
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.85)}
+@keyframes rise{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+.sheet .crown{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.3em;color:var(--grn2);text-transform:uppercase}
+.sheet h2{font-family:'Fraunces',serif;font-weight:600;font-size:30px;margin-top:6px;line-height:1.05}
+.bigstars{font-size:42px;letter-spacing:8px;margin:14px 0 6px;color:rgba(237,230,214,.16);height:46px}
+.bigstars .s{display:inline-block;color:var(--gold2);text-shadow:0 0 18px rgba(244,200,105,.7);
+  animation:starpop .5s cubic-bezier(.18,1.5,.4,1) backwards}
+.winstats{display:flex;justify-content:center;gap:22px;margin:8px 0 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mut)}
+.winstats b{display:block;font-family:'Fraunces',serif;font-size:22px;color:var(--gold2);font-weight:700;margin-bottom:2px}
+@keyframes starpop{from{opacity:0;transform:scale(0) rotate(-40deg)}to{opacity:1;transform:none}}
+.note{border-left:2px solid var(--grn);background:rgba(91,189,138,.06);border-radius:0 12px 12px 0;padding:13px 14px;
+  margin:6px 0 18px;font-size:13.5px;line-height:1.55;color:#d8efe0;text-align:left}
+.note .lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--grn2);display:block;margin-bottom:6px}
+.sheet .row{display:flex;gap:9px}
+
+/* fail flash */
+.failmsg{position:fixed;left:50%;top:30%;transform:translateX(-50%);z-index:70;font-family:'Fraunces',serif;font-size:32px;
+  color:var(--red);text-shadow:0 4px 24px rgba(0,0,0,.7);pointer-events:none;opacity:0}
+.failmsg.show{animation:failp 1s ease}
+@keyframes failp{0%{opacity:0;transform:translateX(-50%) scale(.5)}25%{opacity:1;transform:translateX(-50%) scale(1.1)}
+  75%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(1)}}
+
+#confetti{position:fixed;inset:0;z-index:100;pointer-events:none;display:none}
+
+/* tiny toast */
+.toast{position:fixed;left:50%;bottom:calc(20px + var(--safe-b));transform:translateX(-50%) translateY(20px);z-index:90;
+  background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px 16px;font-size:13px;color:var(--ink);
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============= HOME / MAP ============= -->
+  <div class="scene" id="home">
+    <div class="top">
+      <div>
+        <div class="eyebrow">Resources Desk · Build</div>
+        <div class="title">The <em>Stack</em></div>
+      </div>
+      <div class="statpill">
+        STARS<br><b id="totalStars">0</b> / <span id="maxStars">21</span><br>
+        <span style="opacity:.7">BEST STREAK</span><br><b id="bestStreak" style="font-size:13px">0</b>
+      </div>
+    </div>
+    <div class="sub">Stack each valuation chain in the right calculation order — fastest, flawless runs earn three stars. Tap the line you think comes <b style="color:var(--gold2)">next</b>; no checking, no second-guessing.</div>
+
+    <div class="maplbl"><span>The Chains</span><span id="unlockedLbl"></span></div>
+    <div class="map" id="map"></div>
+
+    <button class="btn s" style="margin-top:10px" id="resetBtn">Reset progress</button>
+  </div>
+
+  <!-- ============= GAME ============= -->
+  <div class="scene" id="game">
+    <div class="gtop">
+      <button class="iconbtn" id="backBtn">‹</button>
+      <div class="ttl">
+        <div class="tag" id="gTag">FCF BUILD</div>
+        <div class="nm" id="gName">Chain</div>
+      </div>
+      <button class="iconbtn" id="hintBtn" title="Hint">💡</button>
+    </div>
+
+    <div class="hud">
+      <div class="cell"><div class="k">Score</div><div class="v gold" id="score">0</div></div>
+      <div class="cell"><div class="k">Combo</div><div class="v" id="combo">×1</div></div>
+      <div class="cell"><div class="k">Lives</div><div class="lives" id="livesEl"></div></div>
+    </div>
+
+    <div class="pbar"><i id="pbarFill"></i></div>
+    <div class="timebar"><i id="timeFill"></i></div>
+
+    <div class="goal" id="gGoal">Goal</div>
+    <div class="prompt">tap the line that comes <b>next</b> in the calculation</div>
+
+    <div class="stack" id="stack"></div>
+    <div class="trayhdr"><span>Remaining</span><span id="trayCount"></span></div>
+    <div class="tray" id="tray"></div>
+  </div>
+
+</div>
+
+<!-- overlays -->
+<div class="overlay" id="winOverlay">
+  <div class="sheet">
+    <div class="crown" id="winCrown">✓ Stacked correctly</div>
+    <h2 id="winTitle">Chain complete</h2>
+    <div class="bigstars" id="bigStars"></div>
+    <div class="winstats">
+      <div><b id="wScore">0</b>SCORE</div>
+      <div><b id="wTime">0s</b>TIME</div>
+      <div><b id="wMiss">0</b>MISSES</div>
+    </div>
+    <div class="note"><span class="lbl">Why it works</span><span id="winNote"></span></div>
+    <div class="row">
+      <button class="btn s" id="winMap" style="flex:0 0 42%">Chains</button>
+      <button class="btn g" id="winNext" style="flex:1">Next chain →</button>
+    </div>
+  </div>
+</div>
+
+<div class="failmsg" id="failMsg">Stack collapsed</div>
+<canvas id="confetti"></canvas>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================ DATA ================================ */
+const X = {mul:"×", min:"−", div:"÷", to:"→"};
+const PUZZLES = [
+  { goal:"From EBIT to unlevered free cash flow", tag:"FCF build",
+    lines:["EBIT (operating profit)","× (1 − tax rate)  →  NOPAT","+ D&A  (non-cash, added back)","− Capital expenditure","− Increase in working capital  =  Unlevered FCF"],
+    note:"Unlevered FCF is pre-financing — it ignores interest — which is exactly why you discount it at the WACC to get enterprise value." },
+  { goal:"From yearly cash flows to value per share", tag:"DCF flow",
+    lines:["Forecast unlevered FCF for each year of the plan","Discount each year back at the WACC","Sum the present values  →  enterprise value","− Net debt (and minorities)","=  Equity value","÷ diluted shares  =  value per share"],
+    note:"EV → equity value → per share. Botching that bridge — or using basic instead of diluted shares — is where per-share valuations quietly go wrong." },
+  { goal:"Bridge from market cap to enterprise value", tag:"EV bridge",
+    lines:["Equity value (market capitalisation)","+ Net debt  (debt − cash)","+ Minority interests","− Investments in associates / JVs","=  Enterprise value"],
+    note:"EV is the cost of the whole operating business, capital-structure-neutral: add what others have claims on, strip out non-core stakes." },
+  { goal:"Sum-of-the-parts NAV per share", tag:"SOTP / NAV",
+    lines:["Value each project on its own NPV","Sum the project NPVs","+ Cash and listed investments","− Net debt","− Capitalised corporate / G&A costs","=  NAV   →  ÷ shares = NAV per share"],
+    note:"SOTP is the natural lens for a multi-asset name like Develop — value producer, developments and the cash-generating services arm separately, then net off debt and head office." },
+  { goal:"Diluted shares via the treasury-stock method", tag:"Dilution",
+    lines:["Start with the in-the-money options","Assume exercise  →  company receives the strike proceeds","Use the proceeds to buy back shares at the current price","Net new shares = options − shares bought back","+ basic shares  =  diluted share count"],
+    note:"Only the NET new shares dilute, because the strike money buys stock back. Adding every option is the rookie error that overstates the count." },
+  { goal:"Test an all-scrip deal for accretion", tag:"Accretion",
+    lines:["Value the target; convert to acquirer shares issued","Combine the two net incomes (+ run-rate synergies)","Combined earnings ÷ combined shares = pro-forma EPS","Compare pro-forma EPS to acquirer's standalone EPS","Higher = accretive;  lower = dilutive"],
+    note:"Accretion is just a pro-forma EPS comparison. Shortcut for all-scrip: acquirer P/E above target P/E → accretive." },
+  { goal:"From ounces in the ground to project free cash flow", tag:"Mine FCF",
+    lines:["Gold produced (oz)  ×  gold price  =  revenue","− AISC × ounces  =  operating cash margin","− Tax  (mind any tax-loss shield)","− Growth / development capex","=  Project free cash flow"],
+    note:"Price and AISC set the margin; FX (USD revenue vs AUD costs) and carried-forward tax losses swing what actually lands as cash." },
+];
+const MAX_STARS = PUZZLES.length * 3;
+const START_LIVES = 3;
+const SECS_PER_LINE = 7;      // time budget per line for the speed clock
+const BASE = 100;             // base points per correct placement
+
+/* ================================ STATE ================================ */
+const SAVE_KEY = "thestack.v2";
+let save = load();
+function load(){
+  try{ const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if(s&&s.stars) return s; }catch(e){}
+  return { stars:Array(PUZZLES.length).fill(0), bestStreak:0 };
+}
+function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
+function unlockedCount(){ let n=1; for(let i=0;i<PUZZLES.length;i++){ if(save.stars[i]>0) n=Math.max(n,i+2); } return Math.min(n,PUZZLES.length); }
+
+const G = {}; // active game
+
+/* ================================ AUDIO ================================ */
+let actx=null;
+function ac(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(actx&&actx.state==="suspended") actx.resume(); return actx; }
+function tone(freq, dur, type="sine", vol=0.16, slideTo=null){
+  const c=ac(); if(!c) return; const t=c.currentTime;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type; o.frequency.setValueAtTime(freq,t);
+  if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t+dur);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+0.02);
+}
+const sfx = {
+  good(combo){ const base=520+Math.min(combo,8)*55; tone(base,0.14,"triangle",0.18,base*1.5); },
+  lock(){ tone(330,0.1,"sine",0.12,660); },
+  wrong(){ tone(150,0.22,"sawtooth",0.16,90); },
+  win(){ [0,90,180,300].forEach((d,i)=> setTimeout(()=>tone([523,659,784,1047][i],0.32,"triangle",0.16), d)); },
+  fail(){ [0,120].forEach((d,i)=> setTimeout(()=>tone([220,165][i],0.3,"sawtooth",0.16,[110,80][i]), d)); },
+  tick(){ tone(880,0.05,"square",0.05); },
+};
+function buzz(ms){ if(navigator.vibrate) try{ navigator.vibrate(ms); }catch(e){} }
+
+/* ================================ DOM ================================ */
+const $ = s => document.querySelector(s);
+const homeEl=$("#home"), gameEl=$("#game");
+
+/* ---------- HOME render ---------- */
+function showHome(){
+  gameEl.style.display="none"; homeEl.style.display="flex";
+  $("#totalStars").textContent = save.stars.reduce((a,b)=>a+b,0);
+  $("#maxStars").textContent = MAX_STARS;
+  $("#bestStreak").textContent = save.bestStreak||0;
+  const unl = unlockedCount();
+  $("#unlockedLbl").textContent = unl+" / "+PUZZLES.length+" unlocked";
+  const map=$("#map"); map.innerHTML="";
+  PUZZLES.forEach((p,i)=>{
+    const locked = i>=unl;
+    const stars = save.stars[i]||0;
+    const el=document.createElement("div");
+    el.className="lvl"+(locked?" locked":"")+(stars>0?" done":"");
+    el.innerHTML =
+      `<div class="idx">${locked?"":i+1}</div>
+       <div class="info"><div class="tag">${p.tag}</div><div class="nm">${p.goal}</div></div>
+       <div class="rt">${ locked ? '<div class="lock">🔒</div>'
+          : (stars>0 ? `<div class="stars">${starStr(stars)}</div>` : '<div class="play">▶</div>') }</div>`;
+    if(!locked) el.onclick = ()=>{ ac(); startGame(i); };
+    map.appendChild(el);
+  });
+}
+function starStr(n){ let s=""; for(let i=0;i<3;i++) s += i<n?"<b>★</b>":"☆"; return s; }
+
+/* ---------- GAME ---------- */
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function startGame(idx){
+  const p = PUZZLES[idx];
+  G.idx=idx; G.p=p;
+  G.placed=0;                       // how many correct lines locked in
+  G.score=0; G.combo=0; G.misses=0; G.lives=START_LIVES;
+  G.streak=0;                       // perfect-in-a-row this run (for combo)
+  G.order = shuffle(p.lines.map((_,i)=>i)); // remaining indices in tray
+  // ensure not already solved order
+  G.total = p.lines.length;
+  G.budget = G.total*SECS_PER_LINE;
+  G.timeLeft = G.budget;
+  G.busy=false; G.done=false;
+
+  homeEl.style.display="none"; gameEl.style.display="flex";
+  $("#gTag").textContent = p.tag.toUpperCase();
+  $("#gName").textContent = p.goal;
+  $("#gGoal").textContent = p.goal;
+  $("#stack").innerHTML="";
+  renderHud(); renderTray(); updateProgress();
+  startClock();
+}
+
+function renderHud(){
+  $("#score").textContent = G.score;
+  const c=$("#combo"); c.textContent = "×"+Math.max(1,G.combo);
+  const lv=$("#livesEl"); lv.innerHTML="";
+  for(let i=0;i<START_LIVES;i++){ const s=document.createElement("span"); s.textContent="◆"; s.style.color = i<G.lives?"var(--gold2)":"rgba(237,230,214,.15)"; lv.appendChild(s); }
+}
+function updateProgress(){
+  $("#pbarFill").style.width = (G.placed/G.total*100)+"%";
+  $("#trayCount").textContent = G.order.length+" left";
+}
+
+function renderTray(){
+  const tray=$("#tray"); tray.innerHTML="";
+  G.order.forEach(li=>{
+    const el=document.createElement("div");
+    el.className="card"; el.dataset.li=li;
+    el.innerHTML=`<div class="dot"></div><div class="t">${PUZZLES[G.idx].lines[li]}</div><div class="ar">↑</div>`;
+    el.onclick=(e)=> tapCard(li, el, e);
+    tray.appendChild(el);
+  });
+}
+
+function tapCard(li, el, e){
+  if(G.busy||G.done) return;
+  const correctNext = G.placed; // index in correct order we need
+  if(li===correctNext){
+    correctPlace(li, el, e);
+  } else {
+    wrongPlace(el, e);
+  }
+}
+
+function correctPlace(li, el, e){
+  G.busy=true;
+  G.combo += 1; G.streak += 1;
+  G.streakMax = Math.max(G.streakMax||0, G.combo);
+  const mult = Math.max(1, G.combo);
+  // time bonus: fraction of per-line budget remaining
+  const tb = Math.round( BASE * 0.5 * (G.timeLeft / G.budget) );
+  const gained = BASE*mult + tb;
+  G.score += gained;
+  G.placed += 1;
+  G.order = G.order.filter(x=>x!==li);
+
+  sfx.good(G.combo); sfx.lock(); buzz(18);
+  flyPoints(e, "+"+gained);
+  popCombo();
+  el.classList.add("right");
+
+  // animate: remove card, append locked slot
+  setTimeout(()=>{
+    addSlot(li);
+    renderTray();
+    renderHud(); updateProgress();
+    G.busy=false;
+    if(G.placed>=G.total) finishWin();
+  }, 150);
+}
+
+function addSlot(li){
+  const slot=document.createElement("div");
+  slot.className="slot";
+  slot.innerHTML=`<div class="n">${G.placed}</div><div class="t">${PUZZLES[G.idx].lines[li]}</div><div class="chk">✓</div>`;
+  $("#stack").appendChild(slot);
+}
+
+function wrongPlace(el, e){
+  G.misses += 1; G.combo=0; G.streak=0; G.lives -= 1;
+  G.score = Math.max(0, G.score-40);
+  G.timeLeft = Math.max(2, G.timeLeft-3); // time penalty
+  sfx.wrong(); buzz([40,40,40]);
+  el.classList.remove("wrong"); void el.offsetWidth; el.classList.add("wrong");
+  flyPoints(e, "−40", true);
+  renderHud();
+  if(G.lives<=0) finishFail();
+}
+
+/* ---------- timing ---------- */
+function startClock(){
+  stopClock();
+  G.last = performance.now();
+  let warned=false;
+  G.timer = setInterval(()=>{
+    if(G.busy && false) return;
+    const now=performance.now(); const dt=(now-G.last)/1000; G.last=now;
+    G.timeLeft -= dt;
+    if(G.timeLeft<=0){ G.timeLeft=0; renderTime(); finishFail(true); return; }
+    if(G.timeLeft < G.budget*0.25){ if(!warned){warned=true;} if(Math.random()<0.04) sfx.tick(); }
+    renderTime();
+  }, 90);
+}
+function stopClock(){ if(G.timer){ clearInterval(G.timer); G.timer=null; } }
+function renderTime(){
+  const f=$("#timeFill"); const pct=Math.max(0,G.timeLeft/G.budget)*100;
+  f.style.width=pct+"%";
+  f.style.background = pct<25 ? "linear-gradient(90deg,var(--red),var(--gold))"
+                    : "linear-gradient(90deg,var(--grn),var(--gold))";
+}
+
+/* ---------- end states ---------- */
+function finishWin(){
+  G.done=true; stopClock();
+  // stars: 3 = no misses & >40% time left; 2 = <=1 miss; 1 otherwise
+  let stars=1;
+  if(G.misses===0 && G.timeLeft > G.budget*0.40) stars=3;
+  else if(G.misses<=1) stars=2;
+  // completion bonus
+  const tb = Math.round(G.timeLeft*5);
+  G.score += tb;
+  // streak across the whole session
+  save.bestStreak = Math.max(save.bestStreak||0, G.streakMax||G.combo, G.combo);
+  if(stars>(save.stars[G.idx]||0)) save.stars[G.idx]=stars;
+  persist();
+  sfx.win(); buzz([20,60,20,60,120]);
+  showWin(stars, tb);
+  fireConfetti();
+}
+function finishFail(timeout){
+  if(G.done) return; G.done=true; stopClock();
+  sfx.fail(); buzz([80,60,80,60,200]);
+  const fm=$("#failMsg"); fm.textContent = timeout?"Time's up":"Stack collapsed";
+  fm.classList.remove("show"); void fm.offsetWidth; fm.classList.add("show");
+  setTimeout(()=>{ startGame(G.idx); }, 1150); // retry same chain
+}
+
+/* ---------- win overlay ---------- */
+function showWin(stars, timeBonus){
+  const ov=$("#winOverlay");
+  $("#winCrown").textContent = stars===3 ? "★ Flawless build" : "✓ Stacked correctly";
+  $("#winTitle").textContent = PUZZLES[G.idx].goal;
+  const bs=$("#bigStars"); bs.innerHTML="";
+  for(let i=0;i<3;i++){ const s=document.createElement("span"); if(i<stars){s.className="s";s.style.animationDelay=(0.15+i*0.18)+"s";s.textContent="★";} else s.textContent="☆"; bs.appendChild(s); }
+  $("#wScore").textContent=G.score;
+  $("#wTime").textContent=Math.round(G.budget-G.timeLeft)+"s";
+  $("#wMiss").textContent=G.misses;
+  $("#winNote").textContent=PUZZLES[G.idx].note;
+  G.isLast = G.idx>=PUZZLES.length-1;
+  $("#winNext").textContent = G.isLast ? "All chains ✓" : "Next chain →";
+  ov.classList.add("show");
+}
+function hideWin(){ $("#winOverlay").classList.remove("show"); }
+
+/* ---------- hint ---------- */
+function useHint(){
+  if(G.busy||G.done) return;
+  const need = G.placed;
+  const card = $("#tray").querySelector('.card[data-li="'+need+'"]');
+  if(!card) return;
+  // cost: lose combo + a few points
+  G.combo=0; G.score=Math.max(0,G.score-15); G.timeLeft=Math.max(2,G.timeLeft-2);
+  renderHud();
+  card.classList.add("hintglow");
+  if(card.scrollIntoView) card.scrollIntoView({block:"nearest",behavior:"smooth"});
+  sfx.tick();
+  setTimeout(()=>card.classList.remove("hintglow"), 1100);
+}
+
+/* ---------- floating popups ---------- */
+function flyPoints(e, txt, bad){
+  const el=document.createElement("div"); el.className="fly"; el.textContent=txt;
+  if(bad) el.style.color="var(--red)";
+  let x = window.innerWidth/2, y = window.innerHeight*0.4;
+  if(e && e.clientX){ x=e.clientX; y=e.clientY; }
+  el.style.left=x+"px"; el.style.top=y+"px";
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1000);
+}
+function popCombo(){
+  const c=$("#combo"); c.classList.remove("combo-pop"); void c.offsetWidth; c.classList.add("combo-pop");
+  setTimeout(()=>c.classList.remove("combo-pop"),250);
+  if(G.combo>=3) toast("Combo ×"+G.combo+"  🔥");
+}
+
+/* ---------- confetti ---------- */
+const cv=$("#confetti"), cx=cv.getContext("2d");
+function fireConfetti(){
+  cv.style.display="block"; cv.width=innerWidth; cv.height=innerHeight;
+  const cols=["#e6a92f","#f4c869","#5bbd8a","#7fe0ac","#ede6d6"];
+  const N=140, parts=[];
+  for(let i=0;i<N;i++) parts.push({
+    x:innerWidth/2+(Math.random()-.5)*120, y:innerHeight*0.32,
+    vx:(Math.random()-.5)*11, vy:Math.random()*-13-4,
+    g:0.32+Math.random()*0.2, w:5+Math.random()*7, h:7+Math.random()*9,
+    rot:Math.random()*6.28, vr:(Math.random()-.5)*0.4, col:cols[(Math.random()*cols.length)|0], life:0
+  });
+  let frames=0;
+  function step(){
+    cx.clearRect(0,0,cv.width,cv.height); frames++;
+    let alive=false;
+    for(const p of parts){
+      p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life++;
+      if(p.y<innerHeight+30){ alive=true; }
+      cx.save(); cx.translate(p.x,p.y); cx.rotate(p.rot);
+      cx.globalAlpha=Math.max(0,1-frames/150); cx.fillStyle=p.col;
+      cx.fillRect(-p.w/2,-p.h/2,p.w,p.h); cx.restore();
+    }
+    if(alive && frames<160) requestAnimationFrame(step);
+    else { cx.clearRect(0,0,cv.width,cv.height); cv.style.display="none"; }
+  }
+  requestAnimationFrame(step);
+}
+
+/* ---------- toast ---------- */
+let toastT=null;
+function toast(msg){
+  const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1300);
+}
+
+/* ================================ WIRING ================================ */
+$("#backBtn").onclick=()=>{ stopClock(); G.done=true; showHome(); };
+$("#hintBtn").onclick=useHint;
+$("#winMap").onclick=()=>{ hideWin(); showHome(); };
+$("#winNext").onclick=()=>{ hideWin(); if(G.isLast){ showHome(); } else { startGame(G.idx+1); } };
+$("#resetBtn").onclick=()=>{
+  if(confirm("Reset all stars and progress?")){ save={stars:Array(PUZZLES.length).fill(0),bestStreak:0}; persist(); showHome(); }
+};
+addEventListener("resize", ()=>{ if(cv.style.display==="block"){ cv.width=innerWidth; cv.height=innerHeight; } });
+// prevent pull-to-refresh / rubber-band on scroll containers handled by overflow
+
+showHome();
+</script>
+</body>
+</html>
