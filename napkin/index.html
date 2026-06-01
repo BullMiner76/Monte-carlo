@@ -217,6 +217,56 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
 .tor-half.l .b{background:linear-gradient(90deg,#ef8a73,var(--red));border-radius:5px 0 0 5px}
 .tor-half.r .b{background:linear-gradient(90deg,var(--grn),var(--grn2));border-radius:0 5px 5px 0}
 .tor-row .sw{flex:0 0 auto;min-width:62px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--gold2)}
+
+/* ===== new recall exercise types ===== */
+@keyframes shk{10%,90%{transform:translateX(-2px)}30%,70%{transform:translateX(5px)}50%{transform:translateX(-7px)}}
+.shk{animation:shk .4s}
+.subq{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--mut);text-transform:uppercase;margin:14px 2px 9px}
+/* forage chips */
+.pick-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.pchip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:11px 13px;font-size:13.5px;cursor:pointer;transition:transform .12s,border-color .15s,background .15s}
+.pchip:active{transform:scale(.96)}
+.pchip.sel{border-color:var(--gold);background:var(--panel2)}
+.pchip .pv{font-family:'JetBrains Mono',monospace;color:var(--gold2);font-weight:700}
+.pchip.hit{border-color:var(--grn);background:rgba(91,189,138,.14)}
+.pchip.miss{border-color:var(--red);background:rgba(224,102,75,.14)}
+/* cascade node grid */
+.ngrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ncell{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:13px 12px;text-align:center;cursor:pointer;transition:transform .12s,border-color .15s,background .15s}
+.ncell:active{transform:scale(.97)}
+.ncell .nk{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase}
+.ncell .nm{font-family:'Fraunces',serif;font-size:15px;margin-top:3px;color:var(--ink)}
+.ncell.sel{border-color:var(--gold);background:var(--panel2)}
+.ncell.hit{border-color:var(--grn);background:rgba(91,189,138,.14)} .ncell.hit .nm{color:var(--grn2)}
+.ncell.missed{border-color:var(--red);background:rgba(224,102,75,.14)}
+.ncell.falsep{border-color:var(--gold2);background:rgba(230,169,47,.13)}
+/* direction beat */
+.dirrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dirrow .dn{flex:1;font-size:14px}
+.dirbtn{width:46px;height:42px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--mut);font-size:18px;cursor:pointer;flex:0 0 auto}
+.dirbtn:active{transform:translateY(1px)}
+.dirbtn.on.up{border-color:var(--grn);color:var(--grn2);background:rgba(91,189,138,.12)}
+.dirbtn.on.dn{border-color:var(--red);color:var(--red);background:rgba(224,102,75,.12)}
+.dirbtn.correct{box-shadow:0 0 0 1.5px var(--grn);color:var(--grn2)}
+/* predict big buttons */
+.predrow{display:flex;gap:10px;margin:8px 0 12px}
+.predbtn{flex:1;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:18px 12px;cursor:pointer;font-family:'Fraunces',serif;font-size:17px;transition:transform .1s,border-color .15s,background .15s}
+.predbtn:active{transform:translateY(1px)}
+.predbtn .ar{font-size:24px;display:block;margin-bottom:3px}
+.predbtn.right{border-color:var(--grn);background:rgba(91,189,138,.13)}
+.predbtn.wrong{border-color:var(--red);background:rgba(224,102,75,.13)}
+.predbtn.dim{opacity:.45}
+/* audit lines */
+.auditline{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:13px 14px;margin-bottom:9px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.4;cursor:pointer;transition:transform .1s,border-color .15s,background .15s}
+.auditline:active{transform:scale(.99);border-color:var(--gold)}
+.auditline.bad{border-color:var(--red);background:rgba(224,102,75,.13)}
+.auditline.good{border-color:var(--grn);background:rgba(91,189,138,.13)}
+.auditline.dim{opacity:.5}
+/* blank napkin recap */
+.napkin{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:6px 14px;margin-top:4px}
+.napkin .nr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line2);font-family:'JetBrains Mono',monospace;font-size:13px}
+.napkin .nr:last-child{border-bottom:none}
+.napkin .nr .k{color:var(--mut)} .napkin .nr .v{color:var(--gold2);font-weight:700}
 </style>
 </head>
 <body>
@@ -266,7 +316,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
 const WORLDS = [
 {
   id:"develop", n:1, name:"Develop Global", project:"Woodlawn", tag:"World 1 · Base-metals producer",
-  ds:"A producing copper-equivalent mine with a growth option. Learn the ore-to-equity chain, then survive a price crash and a mill failure.",
+  ds:"A producing copper-equivalent mine with a growth option. Build the ore-to-equity chain from memory, then trace shocks through it.",
   brief:[
     {h:"The setup", kv:[
       ["Company","Develop Global (ASX:DVP)"],
@@ -274,118 +324,162 @@ const WORLDS = [
       ["You are","The covering analyst"],
     ]},
     {h:"Production", kv:[
-      ["Throughput","1.0 Mt ore / yr"],
-      ["Head grade","3.0% copper-equiv"],
-      ["Recovery","90%"],
+      ["Throughput", IN=>IN.throughput.toFixed(2)+" Mt ore / yr"],
+      ["Head grade", IN=>IN.grade.toFixed(1)+"% copper-equiv"],
+      ["Recovery", IN=>IN.recovery+"%"],
     ]},
     {h:"Market & costs", kv:[
-      ["Realised price","A$10,000 / t metal"],
-      ["Operating cost","A$150 / t ore"],
-      ["Sustaining capex","A$20m / yr"],
+      ["Realised price", IN=>"A$"+IN.price.toLocaleString()+" / t metal"],
+      ["Operating cost", IN=>"A$"+IN.opexPerTonne+" / t ore"],
+      ["Sustaining capex", IN=>"A$"+IN.sustainingCapex+"m / yr"],
     ]},
     {h:"Capital & life", kv:[
-      ["Mine life","8 years"],
-      ["Discount rate","8%  (8-yr annuity factor 5.75)"],
-      ["Tax","30% — early years shielded by ~A$342m losses"],
-      ["Net debt","A$80m"],
-      ["Shares on issue","280m"],
+      ["Mine life", IN=>IN.life+" years"],
+      ["Discount rate", (IN,base)=>IN.discountRate+"%  (annuity factor "+base.annuity.toFixed(2)+")"],
+      ["Tax","30% — early years shielded by carried-forward losses"],
+      ["Net debt", IN=>"A$"+IN.netDebt+"m"],
+      ["Shares on issue", IN=>IN.shares+"m"],
     ]},
   ],
   steps:[
-    {type:"calc",node:"Payable metal",key:"metal",unit:"t/yr",pre:"",ans:27000,tol:.02,
-      q:"How much metal do you actually get paid for each year?",
-      givens:[["Throughput","1.0 Mt"],["Grade","3.0%"],["Recovery","90%"]],
-      work:"1,000,000 t × 3.0% × 90% = 27,000 t",
-      why:"Only recovered, payable metal earns money. Apply grade, then recovery, to throughput — never the headline tonnes."},
-    {type:"calc",node:"Revenue",key:"revenue",unit:"A$m",pre:"A$",ans:270,tol:.02,
+    {type:"forage", node:"Payable metal", ansKey:"metal", unit:"t/yr", pre:"",
+      q:"How much metal do you actually get paid for? First, grab only the inputs that matter.",
+      need:["throughput","grade","recovery"], decoys:["price","netDebt","shares"],
+      work:(IN,base)=>IN.throughput.toFixed(2)+"Mt × "+IN.grade.toFixed(1)+"% × "+IN.recovery+"% = "+Math.round(base.metal).toLocaleString()+" t",
+      why:"Only recovered, payable metal earns money. Price, debt and the share count matter later — never to the tonnes in the ground."},
+    {type:"calc", node:"Revenue", key:"revenue", ansKey:"revenue", unit:"A$m", pre:"A$",
       q:"What's annual revenue?",
-      givens:[["Payable metal","27,000 t"],["Price","A$10,000/t"]],
-      work:"27,000 t × A$10,000/t = A$270m",
-      why:"Revenue = payable metal × realised price. (We're in A$ for now — the USD/AUD rate comes back to bite in a later world.)"},
-    {type:"calc",node:"Operating cost",key:"opex",unit:"A$m",pre:"A$",ans:150,tol:.02,
+      givens:(IN,base)=>[["Payable metal",fmtKey("metal",base.metal)],["Price",fmtKey("price",IN.price)]],
+      work:(IN,base)=>Math.round(base.metal).toLocaleString()+" t × "+fmtKey("price",IN.price)+" = A$"+Math.round(base.revenue)+"m",
+      why:"Revenue = payable metal × realised price."},
+    {type:"calc", node:"Operating cost", key:"opex", ansKey:"opex", unit:"A$m", pre:"A$",
       q:"What's the annual operating cost?",
-      givens:[["Cost","A$150/t ore"],["Throughput","1.0 Mt"]],
-      work:"A$150/t × 1,000,000 t = A$150m",
-      why:"Base-metal costs are usually quoted per tonne of ore milled. Multiply by throughput to get total cash costs."},
-    {type:"calc",node:"Operating margin",key:"margin",unit:"A$m",pre:"A$",ans:120,tol:.02,
+      givens:(IN,base)=>[["Cost",fmtKey("opexPerTonne",IN.opexPerTonne)+" ore"],["Throughput",fmtKey("throughput",IN.throughput)]],
+      work:(IN,base)=>fmtKey("opexPerTonne",IN.opexPerTonne)+" × "+IN.throughput.toFixed(2)+"Mt = A$"+Math.round(base.opex)+"m",
+      why:"Base-metal costs are quoted per tonne of ore milled — multiply by throughput for total cash costs."},
+    {type:"calc", node:"Operating margin", key:"margin", ansKey:"margin", unit:"A$m", pre:"A$",
       q:"What's the operating cash margin?",
-      givens:[["Revenue","A$270m"],["Opex","A$150m"]],
-      work:"270 − 150 = A$120m",
-      why:"Margin = revenue − cash costs. This is the project's heartbeat: everything below flexes with it."},
-    {type:"calc",node:"Free cash flow",key:"fcf",unit:"A$m",pre:"A$",ans:100,tol:.02,
+      givens:(IN,base)=>[["Revenue",fmtKey("revenue",base.revenue)],["Opex",fmtKey("opex",base.opex)]],
+      work:(IN,base)=>Math.round(base.revenue)+" − "+Math.round(base.opex)+" = A$"+Math.round(base.margin)+"m",
+      why:"Margin = revenue − cash costs. The project's heartbeat: everything below flexes with it."},
+    {type:"calc", node:"Free cash flow", key:"fcf", ansKey:"fcf", unit:"A$m", pre:"A$",
       q:"What's annual free cash flow?",
-      givens:[["Margin","A$120m"],["Sustaining capex","A$20m"],["Tax","shielded (yr 1)"]],
-      work:"120 − 20 capex = A$100m (tax shielded by carried-forward losses early on)",
-      why:"FCF = margin − sustaining capex − cash tax. Those A$342m of losses mean little-to-no tax in the early years, flattering early cash flow — and NPV."},
-    {type:"calc",node:"NPV of operations",key:"npv",unit:"A$m",pre:"A$",ans:575,tol:.02,
-      q:"Discount the cash flow stream — what's the NPV of operations?",
-      givens:[["FCF/yr","A$100m"],["Life","8 yrs"],["Annuity factor @8%","5.75"]],
-      work:"100 × 5.75 = A$575m",
-      why:"A level cash flow for n years is just FCF × the annuity factor. Knowing a few factors (8yr@8% ≈ 5.75) lets you value a mine in your head."},
-    {type:"calc",node:"Equity value",key:"equity",unit:"A$m",pre:"A$",ans:495,tol:.02,
+      givens:(IN,base)=>[["Margin",fmtKey("margin",base.margin)],["Sustaining capex",fmtKey("sustainingCapex",IN.sustainingCapex)],["Tax","shielded (yr 1)"]],
+      work:(IN,base)=>Math.round(base.margin)+" − "+IN.sustainingCapex+" capex = A$"+Math.round(base.fcf)+"m (tax shielded early)",
+      why:"FCF = margin − sustaining capex − cash tax. Carried-forward losses mean little tax early, flattering cash flow and NPV."},
+    {type:"calc", node:"NPV of operations", key:"npv", ansKey:"npv", unit:"A$m", pre:"A$",
+      q:"Discount the stream — what's the NPV of operations?",
+      givens:(IN,base)=>[["FCF/yr",fmtKey("fcf",base.fcf)],["Life",IN.life+" yrs"],["Annuity @"+IN.discountRate+"%",base.annuity.toFixed(2)]],
+      work:(IN,base)=>Math.round(base.fcf)+" × "+base.annuity.toFixed(2)+" = A$"+Math.round(base.npv)+"m",
+      why:"A level cash flow for n years is FCF × the annuity factor. Memorise a few factors and you can value a mine in your head."},
+    {type:"calc", node:"Equity value", key:"equity", ansKey:"equity", unit:"A$m", pre:"A$",
       q:"Bridge to equity value.",
-      givens:[["EV (NPV)","A$575m"],["Net debt","A$80m"]],
-      work:"575 − 80 net debt = A$495m",
-      why:"Enterprise value belongs to all capital providers; subtract net debt to get what's left for equity holders."},
-    {type:"calc",node:"Value per share",key:"perShare",unit:"A$",pre:"A$",ans:1.77,tol:.03,abs:.06,
+      givens:(IN,base)=>[["EV (NPV)",fmtKey("npv",base.npv)],["Net debt",fmtKey("netDebt",IN.netDebt)]],
+      work:(IN,base)=>Math.round(base.npv)+" − "+IN.netDebt+" net debt = A$"+Math.round(base.equity)+"m",
+      why:"Enterprise value belongs to all capital providers; subtract net debt for what's left to equity."},
+    {type:"calc", node:"Value per share", key:"perShare", ansKey:"perShare", unit:"A$", pre:"A$", tol:.03, abs:.06,
       q:"And per share?",
-      givens:[["Equity","A$495m"],["Shares","280m"]],
-      work:"495 ÷ 280 = A$1.77",
-      why:"Always divide by DILUTED shares. You've just built a project from ore to a per-share number — that's the whole napkin."},
+      givens:(IN,base)=>[["Equity",fmtKey("equity",base.equity)],["Shares",IN.shares+"m"]],
+      work:(IN,base)=>Math.round(base.equity)+" ÷ "+IN.shares+" = A$"+base.perShare.toFixed(2),
+      why:"Always divide by DILUTED shares. Ore to a per-share number — that's the whole napkin."},
 
-    {type:"sensitivity",node:"Sensitivity lab",
+    {type:"sensitivity", node:"Sensitivity lab",
       q:"You've built the base case. Now feel which lever actually moves it — then back your judgement."},
 
-    {type:"calc",node:"Price shock",key:"fcf2",unit:"A$m",pre:"A$",ans:46,tol:.04,
-      event:{t:"The market turns",b:"The copper-equivalent price falls 20% — A$10,000 → A$8,000/t. Throughput and costs are unchanged."},
-      q:"What's the new annual free cash flow?",
-      givens:[["Metal","27,000 t"],["New price","A$8,000/t"],["Opex","A$150m"],["Capex","A$20m"]],
-      work:"(27,000 × 8,000 = 216) − 150 − 20 = A$46m",
-      why:"A 20% price fall (−A$54m revenue) lands almost entirely on cash flow because costs are sticky. FCF more than halves: A$100m → A$46m. That's operating leverage — the single biggest reason miners are volatile."},
-    {type:"choice",node:"The response",
-      q:"FCF just dropped from A$100m to A$46m. Best immediate move?",
-      opts:[
-        {t:"Hedge a slice of near-term production to protect cash and covenants",good:true,
-          fb:"Right. You're a price-taker; lock in enough cash to defend liquidity and the balance sheet while you reassess. Living to fight another day beats betting on a bounce."},
-        {t:"Accelerate Sulphur Springs capex to grow out of the downturn",good:false,
-          fb:"Spending into a downturn on half the cash flow is how juniors blow up. Growth capex is the first thing you defer when the price cracks."},
-        {t:"Do nothing — commodity prices mean-revert",good:false,
-          fb:"They might — but covenants and creditors don't wait for the thesis. Hope isn't a treasury policy."}]},
+    {type:"cascade", node:"Reconciliation", affected:["metal","revenue","margin","fcf","npv","equity","perShare"],
+      dirs:{metal:"down",revenue:"down",margin:"down",fcf:"down",npv:"down",equity:"down",perShare:"down"},
+      event:{t:"Grade reconciles low", b:"The mined grade comes in ~10% below the resource model. Throughput and unit costs are unchanged."},
+      q:"Which nodes move — and which way?",
+      why:"Grade flows through metal → revenue → everything downstream. But OPEX is per tonne of ORE, not per tonne of metal — you still mill the same rock, so cash costs don't move. That's the classic reconciliation trap: the margin is squeezed from the top, not the bottom."},
 
-    {type:"calc",node:"Volume shock",key:"rev3",unit:"A$m",pre:"A$",ans:230,tol:.04,
-      event:{t:"Steel hits the crusher",b:"A mill liner fails. Throughput drops 15% this year — 1.0 → 0.85 Mt. Price is back to A$10,000/t. Note: ~80% of operating cost is FIXED, so cash costs barely move."},
-      q:"What's revenue for the impacted year?",
-      givens:[["Throughput","0.85 Mt"],["Grade","3.0%"],["Recovery","90%"],["Price","A$10,000/t"]],
-      work:"0.85Mt × 3% × 90% = 22,950 t × A$10,000 = A$229.5m",
-      why:"Lost tonnes flow straight to revenue (−A$40m). But because costs are mostly fixed, the margin hit is even larger in percentage terms — operating leverage cutting the other way."},
-    {type:"choice",node:"The trade-off",
-      q:"The fix can be done now (lost production + A$ cost) or deferred to the next shutdown. What governs the call?",
+    {type:"predict", node:"Currency", dir:"down", ofWhat:"revenue",
+      event:{t:"The Aussie firms up", b:"The AUD strengthens, cutting the realised A$ metal price ~8%. Volumes are unchanged."},
+      q:"Before you compute — which way does A$ revenue move?",
+      why:"You sell in USD but report in AUD. A stronger AUD means fewer Aussie dollars per tonne — realised A$ revenue falls even though nothing changed underground."},
+    {type:"calc", node:"Revenue · stronger AUD", unit:"A$m", pre:"A$",
+      compute:(IN,base)=> base.metal*(IN.price*0.92)/1e6,
+      q:"Recompute revenue at the new price (~8% lower).",
+      givens:(IN,base)=>[["Metal",fmtKey("metal",base.metal)],["New price","~A$"+Math.round(IN.price*0.92).toLocaleString()+"/t"]],
+      work:(IN,base)=>Math.round(base.metal).toLocaleString()+" t × A$"+Math.round(IN.price*0.92).toLocaleString()+" = A$"+Math.round(base.metal*IN.price*0.92/1e6)+"m",
+      why:"FX hits the top line one-for-one with price. With sticky A$ costs, the margin hit is proportionally bigger — the same operating leverage as a price move."},
+    {type:"choice", node:"The response",
+      q:"The currency move just took a real bite out of cash flow. Best immediate response?",
+      opts:[
+        {t:"Hedge a slice of near-term production / FX to protect cash and covenants",good:true,
+          fb:"Right. You're a price- and rate-taker; lock in enough to defend liquidity and the balance sheet while you reassess."},
+        {t:"Accelerate growth capex to grow out of it",good:false,
+          fb:"Spending into a downturn on compressed cash flow is how juniors blow up. Growth capex is the first thing you defer."},
+        {t:"Do nothing — it'll mean-revert",good:false,
+          fb:"Maybe — but covenants and creditors don't wait for the thesis. Hope isn't a treasury policy."}]},
+
+    {type:"calc", node:"Margin · cost inflation", unit:"A$m", pre:"A$",
+      compute:(IN,base)=> base.revenue - base.opex*1.3,
+      event:{t:"Costs run hot", b:"Diesel, labour and reagents push unit operating cost up 30%. Price and volumes hold."},
+      q:"Recompute the operating margin.",
+      givens:(IN,base)=>[["Revenue",fmtKey("revenue",base.revenue)],["New opex","A$"+Math.round(base.opex*1.3)+"m (+30%)"]],
+      work:(IN,base)=>Math.round(base.revenue)+" − "+Math.round(base.opex*1.3)+" = A$"+Math.round(base.revenue-base.opex*1.3)+"m",
+      why:"Cost inflation hits from the bottom. Revenue is untouched, but the margin — and everything below it — compresses."},
+    {type:"cascade", node:"Cost cascade", affected:["opex","margin","fcf","npv","equity","perShare"],
+      dirs:{opex:"up",margin:"down",fcf:"down",npv:"down",equity:"down",perShare:"down"},
+      q:"With unit costs up 30%, which nodes move — and which way?",
+      why:"Mirror image of the grade shock: opex itself rises, metal and revenue don't move at all, and the squeeze travels down from the margin. Knowing WHICH lever you're pulling tells you where the cascade starts."},
+
+    {type:"calc", node:"NPV · rates up", unit:"A$m", pre:"A$",
+      compute:(IN,base)=>{ var r=(IN.discountRate+3)/100, ann=(1-Math.pow(1+r,-IN.life))/r; return base.fcf*ann; },
+      event:{t:"Rates jump", b:"The discount rate rises 3 percentage points as the cost of capital climbs. Cash flows are unchanged."},
+      q:"Recompute the NPV of operations at the higher discount rate.",
+      givens:(IN,base)=>{ var r=(IN.discountRate+3)/100, ann=(1-Math.pow(1+r,-IN.life))/r; return [["FCF/yr",fmtKey("fcf",base.fcf)],["New rate",(IN.discountRate+3)+"%"],["New annuity",ann.toFixed(2)]]; },
+      work:(IN,base)=>{ var r=(IN.discountRate+3)/100, ann=(1-Math.pow(1+r,-IN.life))/r; return Math.round(base.fcf)+" × "+ann.toFixed(2)+" = A$"+Math.round(base.fcf*ann)+"m"; },
+      why:"Same cash, worth less today. A higher discount rate shrinks the annuity factor — long-dated cash flows feel it most."},
+
+    {type:"inverse", node:"Back-solve", solveFor:"price", target:2.00, unit:"A$/t", pre:"A$",
+      q:"What realised price would the model need to justify A$2.00 per share?",
+      why:"Run the chain backwards: per share → equity → +net debt → NPV → ÷annuity → FCF → +costs → revenue → ÷metal → price. Analysts do this constantly to sanity-check what the market is implying."},
+
+    {type:"choice", node:"The trade-off",
+      event:(IN)=>({t:"Steel hits the crusher", b:"A mill liner fails — throughput drops ~15% for the year. ~80% of operating cost is FIXED, so cash costs barely move."}),
+      q:"Fix it now (lost production + cost) or defer to the next shutdown — what governs the call?",
       opts:[
         {t:"Compare the value of metal recovered sooner against the cost and risk of fixing now",good:true,
-          fb:"Exactly — it's an NPV decision: bring-forward value of production vs cost of the intervention and the risk of a bigger failure. That framing is the job."},
+          fb:"Exactly — an NPV decision: bring-forward value vs the cost of intervention and the risk of a bigger failure."},
         {t:"Always defer maintenance to protect this year's cash",good:false,
           fb:"Deferring can turn a liner swap into a catastrophic failure. Cheap now can be ruinous later."},
         {t:"Always fix immediately regardless of cost",good:false,
           fb:"Not if the deferred option preserves more value. Reflexes aren't analysis."}]},
 
-    {type:"choice",node:"The FID",
-      event:{t:"Sulphur Springs — decision time",b:"You can build Sulphur Springs for A$330m. It would add ~A$60m/yr of FCF for 10 years (PV ≈ A$400m), so ≈ +A$70m of NPV after the build cost. You believe in the project. How do you fund the A$330m?"},
+    {type:"choice", node:"The FID",
+      event:{t:"Sulphur Springs — decision time", b:"You can build Sulphur Springs for A$330m. It would add ~A$60m/yr of FCF for 10 years (PV ≈ A$400m), so ≈ +A$70m of NPV after the build. You believe in it. How do you fund the A$330m?"},
       q:"Pick the structure that best protects existing holders' per-share value:",
       opts:[
         {t:"Offtake prepayment + project debt (the Trafigura/Woodlawn playbook)",good:true,
-          fb:"Right. Non-dilutive capital keeps the +A$70m of NPV with existing shareholders. It's exactly how Beament funded Woodlawn — debt and an offtake prepayment rather than cheap equity."},
+          fb:"Right. Non-dilutive capital keeps the +A$70m of NPV with existing shareholders — exactly how Beament funded Woodlawn."},
         {t:"A large equity placement at a discount to market",good:false,
-          fb:"Fast and certain, but you hand a chunk of the upside to new money at a discount and dilute the very holders you're trying to reward."},
+          fb:"Fast and certain, but you hand upside to new money at a discount and dilute the holders you're trying to reward."},
         {t:"Don't build it — too risky",good:false,
-          fb:"If you genuinely back the project, walking away leaves A$70m of NPV on the table. The question was how to fund it, not whether to flinch."}],
-      why:"Financing choice IS value creation. The same A$70m NPV accrues very differently depending on whether you fund with dilutive equity or structured, non-dilutive capital. This is the heart of ECM advisory."},
+          fb:"If you genuinely back it, walking away leaves A$70m of NPV on the table. The question was how to fund it."}],
+      why:"Financing choice IS value creation. The same NPV accrues very differently under dilutive equity vs structured, non-dilutive capital."},
+
+    {type:"audit", node:"Audit the model", q:"A junior sent you this model. One line is wrong — find it.",
+      lines:(IN,base)=>[
+        {t:"Revenue = metal × price = A$"+Math.round(base.revenue)+"m", ok:true},
+        {t:"Margin = revenue − opex = A$"+Math.round(base.margin)+"m", ok:true},
+        {t:"FCF = margin + sustaining capex = A$"+Math.round(base.margin+IN.sustainingCapex)+"m", ok:false,
+          fix:"FCF = margin − capex, not +. Sustaining capex is cash going OUT; adding it overstates FCF by 2× the capex and inflates the whole valuation."},
+        {t:"NPV = FCF × annuity factor = A$"+Math.round(base.npv)+"m", ok:true},
+        {t:"Equity = NPV − net debt = A$"+Math.round(base.equity)+"m", ok:true},
+      ],
+      why:"Sign errors on cash-out lines are the most common — and most dangerous — modelling mistake. Pressure-test the direction of every term."},
+
+    {type:"blank", node:"Build it blind", chain:["metal","revenue","opex","margin","fcf","npv","equity","perShare"],
+      q:"No chips, no prompts beyond the line name. Rebuild the whole napkin from the brief you memorised.",
+      why:"If you can run ore-in-the-ground to a per-share number with nothing on the page, you own the model — not the spreadsheet."},
   ],
   debrief:{
-    note:"You took ore in the ground all the way to a per-share number, then watched a 20% price move nearly halve cash flow and a 15% volume loss bite even harder. That asymmetry — sticky costs, volatile prices — is why these equities move the way they do, and why funding and hedging decisions matter so much.",
-    sens:[
-      ["Base case","A$100m FCF · NPV A$575m · A$1.77/sh"],
-      ["−20% price","FCF A$46m  (−54%)"],
-      ["−15% volume","Revenue −A$40m, margin hit larger still"],
+    note:"You foraged the right inputs, ran the chain to a per-share number, traced how a grade miss, an FX move, cost inflation and a rate hike each ripple differently, back-solved a price, caught a sign error, and rebuilt it blind. Recall, not recognition — that's the napkin.",
+    sens:(IN,base)=>[
+      ["Base case","A$"+Math.round(base.fcf)+"m FCF · NPV A$"+Math.round(base.npv)+"m · A$"+base.perShare.toFixed(2)+"/sh"],
+      ["Grade −10%","Top-line squeeze — opex unmoved"],
+      ["Opex +30%","Margin −A$"+Math.round(base.opex*0.3)+"m straight to the bottom line"],
     ]
   }
 },
@@ -434,6 +528,62 @@ const LEVERS = [
   {key:"discountRate", nm:"Discount",   kind:"pp"},   // ±2 percentage points
 ];
 
+/* ---- per-play randomisation: draw IN around the canonical base ---- */
+const rnd=(lo,hi)=>lo+Math.random()*(hi-lo);
+const snap=(v,step)=>Math.round(v/step)*step;
+function drawIN(){
+  return {
+    throughput:      +rnd(0.85,1.15).toFixed(2),
+    grade:           +rnd(2.6,3.4).toFixed(1),
+    recovery:        Math.round(rnd(88,92)),
+    price:           snap(rnd(8500,11500),100),
+    opexPerTonne:    snap(rnd(130,170),5),
+    sustainingCapex: Math.round(rnd(15,25)),
+    life:            Math.round(rnd(7,9)),
+    discountRate:    snap(rnd(7,9),0.5),
+    netDebt:         snap(rnd(60,100),5),
+    shares:          snap(rnd(260,300),10),
+  };
+}
+let IN=null, base=null;          // active randomised inputs + derived model (set in showBrief/startWorld)
+
+/* human names + per-key formatters, shared by the new exercises */
+const INPUT_NAMES={ throughput:"Throughput", grade:"Head grade", recovery:"Recovery", price:"Realised price",
+  opexPerTonne:"Unit opex", sustainingCapex:"Sustaining capex", life:"Mine life", discountRate:"Discount rate",
+  netDebt:"Net debt", shares:"Shares on issue",
+  metal:"Payable metal", revenue:"Revenue", opex:"Operating cost", margin:"Margin", fcf:"Free cash flow",
+  npv:"NPV", equity:"Equity", perShare:"Per share" };
+const NODE_NAMES={ metal:"Metal", revenue:"Revenue", opex:"Opex", margin:"Margin", fcf:"FCF", npv:"NPV", equity:"Equity", perShare:"/share" };
+const CHAIN_META={
+  metal:{label:"Payable metal", unit:"t/yr", pre:""},
+  revenue:{label:"Revenue", unit:"A$m", pre:"A$"},
+  opex:{label:"Operating cost", unit:"A$m", pre:"A$"},
+  margin:{label:"Operating margin", unit:"A$m", pre:"A$"},
+  fcf:{label:"Free cash flow", unit:"A$m", pre:"A$"},
+  npv:{label:"NPV of ops", unit:"A$m", pre:"A$"},
+  equity:{label:"Equity value", unit:"A$m", pre:"A$"},
+  perShare:{label:"Value / share", unit:"A$", pre:"A$"},
+};
+/* value of a key, drawing from IN (an input) or base (a model node) */
+function keyVal(k){ return (IN && k in IN) ? IN[k] : (base ? base[k] : null); }
+function fmtKey(k,v){
+  if(v==null) v=keyVal(k);
+  switch(k){
+    case "price": case "opexPerTonne": return "A$"+Math.round(v).toLocaleString()+"/t";
+    case "throughput": return v.toFixed(2)+" Mt";
+    case "grade": return v.toFixed(1)+"%";
+    case "recovery": case "discountRate": return v+"%";
+    case "life": return v+" yrs";
+    case "sustainingCapex": case "netDebt": return "A$"+Math.round(v)+"m";
+    case "shares": return Math.round(v)+"m";
+    case "metal": return Math.round(v).toLocaleString()+" t";
+    case "perShare": return "A$"+v.toFixed(2);
+    default: return "A$"+Math.round(v)+"m";   // revenue/opex/margin/fcf/npv/equity
+  }
+}
+/* resolve a step field that may be a function of (IN, base) */
+const val=(x)=> typeof x==="function" ? x(IN,base) : x;
+
 /* ============================ AUDIO ============================ */
 let actx=null;
 function ac(){ if(!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(actx&&actx.state==="suspended")actx.resume(); return actx;}
@@ -466,22 +616,24 @@ function showMap(){
 /* ============================ BRIEF ============================ */
 function showBrief(i){
   W=WORLDS[i]; swap("brief");
+  IN=drawIN(); base=computeModel(IN);     // fresh draw each visit — the brief is the figures to memorise
   $("#bTag").textContent=W.tag.toUpperCase();
   $("#bName").textContent=W.name+" · "+W.project;
   const b=$("#briefBody"); b.innerHTML="";
   W.brief.forEach(sec=>{
     const d=document.createElement("div"); d.className="dossier";
-    d.innerHTML=`<h3>${sec.h}</h3>`+sec.kv.map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
+    d.innerHTML=`<h3>${sec.h}</h3>`+sec.kv.map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${typeof v==="function"?v(IN,base):v}</span></div>`).join("");
     b.appendChild(d);
   });
   const note=document.createElement("div"); note.className="brief-note";
-  note.textContent="Illustrative training assumptions — rounded and simplified to a single stream for mental-math practice. Not company guidance.";
+  note.textContent="Illustrative training assumptions, drawn fresh each run — so the numbers can't be memorised between plays. Read them now; you'll rebuild the model from them. Not company guidance.";
   b.appendChild(note);
 }
 
 /* ============================ PLAY ============================ */
 function startWorld(){
-  M={}; ptr=0; run={misses:0,goodCh:0,totCh:0}; wfShown=new Set();
+  if(!IN){ IN=drawIN(); base=computeModel(IN); }   // defensive: brief normally draws these
+  M={}; ptr=0; run={misses:0,goodCh:0,totCh:0,IN,base}; wfShown=new Set();
   swap("play");
   $("#pTag").textContent=W.tag.toUpperCase();
   $("#pName").textContent=W.name+" · "+W.project;
@@ -507,7 +659,7 @@ function renderWaterfall(){
   if(M.opex!=null)    rows.push(["opex","− Opex", -M.opex,"neg"]);
   if(M.margin!=null)  rows.push(["margin","= Margin", M.margin,"sub"]);
   if(M.fcf!=null){
-    const capex = (M.margin!=null) ? (M.margin - M.fcf) : BASE_INPUTS.sustainingCapex;
+    const capex = (M.margin!=null) ? (M.margin - M.fcf) : IN.sustainingCapex;
     rows.push(["capex","− Sust. capex", -capex,"neg"]);
     rows.push(["fcf","= Free cash flow", M.fcf,"sub"]);
   }
@@ -522,13 +674,13 @@ function renderWaterfall(){
         + `<span class="wv ${cls}">${signed}</span></div>`;
   });
   if(M.npv!=null || M.equity!=null || M.perShare!=null){
-    const ann = M.fcf ? (M.npv/M.fcf) : computeModel(BASE_INPUTS).annuity;
+    const ann = M.fcf ? (M.npv/M.fcf) : base.annuity;
     let tail="";
     const ts=(key,inner,res)=>{ const nw=!wfShown.has(key); if(nw)wfShown.add(key);
       return `<div class="ts${nw?" in":""}"><span>${inner}</span><span class="res">${res}</span></div>`; };
     if(M.npv!=null)      tail+=ts("t_npv",`FCF <b>×${ann.toFixed(2)}</b> annuity = NPV`, "A$"+Math.round(M.npv)+"m");
-    if(M.equity!=null)   tail+=ts("t_eq", `− net debt <b>A$${BASE_INPUTS.netDebt}m</b> = Equity`, "A$"+Math.round(M.equity)+"m");
-    if(M.perShare!=null) tail+=ts("t_ps", `÷ <b>${BASE_INPUTS.shares}m</b> shares = per share`, "A$"+M.perShare.toFixed(2));
+    if(M.equity!=null)   tail+=ts("t_eq", `− net debt <b>A$${IN.netDebt}m</b> = Equity`, "A$"+Math.round(M.equity)+"m");
+    if(M.perShare!=null) tail+=ts("t_ps", `÷ <b>${IN.shares}m</b> shares = per share`, "A$"+M.perShare.toFixed(2));
     html+=`<div class="wf-tail">${tail}</div>`;
   }
   wf.innerHTML=html;
@@ -538,20 +690,33 @@ function progress(){ $("#pbarFill").style.width=(ptr/W.steps.length*100)+"%"; }
 function renderStep(){
   progress();
   const step=W.steps[ptr]; const body=$("#stepBody"); body.innerHTML=""; body.scrollTop=0;
-  if(step.event){
+  const ev=val(step.event);
+  if(ev){
     const e=document.createElement("div"); e.className="event";
-    e.innerHTML=`<div class="et">⚡ ${step.event.t}</div><div class="eb">${step.event.b}</div>`;
+    e.innerHTML=`<div class="et">⚡ ${ev.t}</div><div class="eb">${ev.b}</div>`;
     body.appendChild(e);
   }
   if(step.type==="calc") renderCalc(step,body);
   else if(step.type==="choice") renderChoice(step,body);
   else if(step.type==="sensitivity") renderSensitivity(step,body);
+  else if(step.type==="forage") renderForage(step,body);
+  else if(step.type==="cascade") renderCascade(step,body);
+  else if(step.type==="inverse") renderInverse(step,body);
+  else if(step.type==="audit") renderAudit(step,body);
+  else if(step.type==="blank") renderBlank(step,body);
+  else if(step.type==="predict") renderPredict(step,body);
 }
+const nextStep=()=>{ ptr++; renderStep(); };
 
 function renderCalc(step,body){
+  const ans   = step.compute ? step.compute(IN,base) : (step.ansKey ? base[step.ansKey] : step.ans);
+  const givens= val(step.givens) || [];
+  const work  = val(step.work) || "";
+  const why   = val(step.why)  || "";
+  const tolPct= step.tol!=null ? step.tol : 0.02;
   const wrap=document.createElement("div");
-  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${step.q}</div>
-    <div class="givens">${step.givens.map(([k,v])=>`<div class="given">${k} <b>${v}</b></div>`).join("")}</div>
+  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${val(step.q)}</div>
+    <div class="givens">${givens.map(([k,v])=>`<div class="given">${k} <b>${v}</b></div>`).join("")}</div>
     <div class="inputrow">
       <div class="field" id="fld"><span class="pre">${step.pre||""}</span>
         <input id="inp" inputmode="decimal" autocomplete="off" placeholder="?" />
@@ -563,44 +728,46 @@ function renderCalc(step,body){
   body.appendChild(wrap);
   const inp=$("#inp"); setTimeout(()=>inp.focus(),120);
   let misses=0, solved=false;
-  const showFB=(good)=>{
-    $("#fld").classList.add(good?"ok":"no");
+  const fmtAns=()=> step.unit==="A$" ? ans.toFixed(2) : Math.round(ans);
+  const showFB=()=>{
+    $("#fld").classList.add("ok");
     const fb=document.createElement("div"); fb.className="fb good";
-    fb.innerHTML=`<span class="lbl">✓ ${step.node}</span><div class="work">${step.work}</div>${step.why}`;
+    fb.innerHTML=`<span class="lbl">✓ ${step.node}</span>${work?`<div class="work">${work}</div>`:""}${why}`;
     $("#fbslot").innerHTML=""; $("#fbslot").appendChild(fb);
-    if(step.key){ M[step.key]=step.ans; renderStrip(); }
+    if(step.key){ M[step.key]=ans; renderStrip(); }
     sfx.good(); buzz(20);
     const c=document.createElement("button"); c.className="btn g"; c.style.marginTop="12px"; c.textContent="Continue →";
-    c.onclick=()=>{ ptr++; renderStep(); };
+    c.onclick=nextStep;
     fb.appendChild(c);
     $("#go").disabled=true; inp.disabled=true; $("#go").textContent="✓";
   };
   const submit=()=>{
     if(solved) return;
     const raw=inp.value.replace(/[, $aA-zZ]/g,"").trim();
-    const val=parseFloat(raw);
-    if(isNaN(val)){ inp.focus(); return; }
-    const tol=step.abs? Math.max(step.abs, Math.abs(step.ans)*step.tol) : Math.abs(step.ans)*step.tol;
-    if(Math.abs(val-step.ans)<=tol){ solved=true; showFB(true); }
+    const num=parseFloat(raw);
+    if(isNaN(num)){ inp.focus(); return; }
+    const tol=step.abs ? Math.max(step.abs, Math.abs(ans)*tolPct) : Math.abs(ans)*tolPct;
+    if(Math.abs(num-ans)<=tol){ solved=true; showFB(); }
     else {
       misses++; run.misses++; sfx.bad(); buzz([40,40,40]);
-      $("#fld").classList.add("no"); setTimeout(()=>$("#fld").classList.remove("no"),420);
+      $("#fld").classList.add("no"); setTimeout(()=>{const _f=$("#fld");if(_f)_f.classList.remove("no");},420);
       if(misses>=2){
-        const r=$("#reveal"); r.textContent="stuck? reveal the answer"; r.onclick=()=>{ inp.value=step.ans; showFB(true); solved=true; };
-        toast("Hint: "+step.work.split("=")[0].trim()+"…");
+        const r=$("#reveal"); r.textContent="stuck? reveal the answer"; r.onclick=()=>{ inp.value=fmtAns(); showFB(); solved=true; };
+        toast(work ? "Hint: "+String(work).split("=")[0].trim()+"…" : "Reveal available below");
       } else toast("Not quite — check the units");
       inp.select();
     }
   };
   $("#go").onclick=submit;
   inp.addEventListener("keydown",e=>{ if(e.key==="Enter") submit(); });
-  $("#reveal").onclick=()=>{ if(solved) return; toast(step.work); };
+  $("#reveal").onclick=()=>{ if(solved) return; toast(work||"Work it from the chain"); };
 }
 
 function renderChoice(step,body){
   run.totCh++;
+  const why=val(step.why);
   const wrap=document.createElement("div");
-  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${step.q}</div><div id="opts"></div><div id="fbslot"></div>`;
+  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${val(step.q)}</div><div id="opts"></div><div id="fbslot"></div>`;
   body.appendChild(wrap);
   const O=$("#opts"); const letters=["A","B","C","D"]; let done=false;
   step.opts.forEach((o,i)=>{
@@ -612,21 +779,212 @@ function renderChoice(step,body){
       [...O.children].forEach((c,j)=>{ c.classList.add("done");
         if(step.opts[j].good) c.classList.add("good"); else if(j===i) c.classList.add("bad"); else c.classList.add("dim"); });
       const fb=document.createElement("div"); fb.className="fb "+(o.good?"good":"bad");
-      fb.innerHTML=`<span class="lbl">${o.good?"✓ Good call":"✗ Think again"}</span>${o.fb}${step.why?`<div style="margin-top:9px;color:var(--mut)">${step.why}</div>`:""}`;
+      fb.innerHTML=`<span class="lbl">${o.good?"✓ Good call":"✗ Think again"}</span>${o.fb}${why?`<div style="margin-top:9px;color:var(--mut)">${why}</div>`:""}`;
       $("#fbslot").appendChild(fb);
       o.good?sfx.good():sfx.bad(); buzz(o.good?20:[40,40,40]);
       const c=document.createElement("button"); c.className="btn "+(o.good?"g":"p"); c.style.marginTop="12px"; c.textContent="Continue →";
-      c.onclick=()=>{ ptr++; renderStep(); };
+      c.onclick=nextStep;
       fb.appendChild(c);
     };
     O.appendChild(b);
   });
 }
 
+/* ---- shared helpers for the new exercises ---- */
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function shake(el){ if(!el)return; el.classList.remove("shk"); void el.offsetWidth; el.classList.add("shk"); setTimeout(()=>el&&el.classList.remove("shk"),440); }
+function contBtn(parent,label){ const c=document.createElement("button"); c.className="btn g"; c.style.marginTop="12px"; c.textContent=label||"Continue →"; c.onclick=nextStep; parent.appendChild(c); return c; }
+function numFrom(inp){ return parseFloat(String(inp.value).replace(/[, $aA-zZ]/g,"").trim()); }
+
+/* a) FORAGE — pick the right inputs, then compute */
+function renderForage(step,body){
+  const ans=base[step.ansKey], why=val(step.why)||"", need=step.need, all=shuffle([...need,...(step.decoys||[])]);
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${val(step.q)}</div>
+    <div class="subq">Tap the inputs this number needs — leave out the rest</div>
+    <div class="pick-wrap" id="picks"></div>
+    <button class="btn p" id="useBtn">Use these →</button><div id="forageSlot"></div>`;
+  body.appendChild(wrap);
+  const PW=$("#picks"), sel=new Set(); let checked=false;
+  all.forEach(k=>{ const c=document.createElement("div"); c.className="pchip"; c.dataset.k=k;
+    c.innerHTML=`<span>${INPUT_NAMES[k]||k}</span><span class="pv">${fmtKey(k)}</span>`;
+    c.onclick=()=>{ if(checked)return; if(sel.has(k)){sel.delete(k);c.classList.remove("sel");}else{sel.add(k);c.classList.add("sel");} };
+    PW.appendChild(c); });
+  $("#useBtn").onclick=()=>{
+    if(checked)return;
+    const same=sel.size===need.length && need.every(k=>sel.has(k));
+    if(!same){ sfx.bad(); buzz([40,40,40]); shake(PW);
+      const extra=[...sel].find(k=>!need.includes(k)), missing=need.find(k=>!sel.has(k));
+      toast(extra?"You don't need "+(INPUT_NAMES[extra]||extra)+" for this":missing?"You're missing an input":"Not the right set"); return; }
+    checked=true; PW.querySelectorAll(".pchip").forEach(c=>{ c.classList.remove("sel"); c.classList.add(need.includes(c.dataset.k)?"hit":"miss"); });
+    $("#useBtn").style.display="none"; sfx.good(); buzz(20);
+    const slot=$("#forageSlot");
+    slot.innerHTML=`<div class="subq">Now compute it</div>
+      <div class="inputrow"><div class="field" id="fld"><span class="pre">${step.pre||""}</span>
+        <input id="inp" inputmode="decimal" autocomplete="off" placeholder="?" /><span class="unit">${step.unit||""}</span></div>
+        <button class="submit" id="go">Lock</button></div><div class="mini" id="reveal">show working</div><div id="fbslot"></div>`;
+    const inp=$("#inp"); setTimeout(()=>inp.focus(),120); let solved=false, miss=0;
+    const showFB=()=>{ $("#fld").classList.add("ok"); solved=true;
+      const fb=document.createElement("div"); fb.className="fb good";
+      fb.innerHTML=`<span class="lbl">✓ ${step.node}</span>${step.work?`<div class="work">${val(step.work)}</div>`:""}${why}`;
+      $("#fbslot").innerHTML=""; $("#fbslot").appendChild(fb); M[step.ansKey]=ans; renderStrip(); sfx.good(); buzz(20); contBtn(fb);
+      $("#go").disabled=true; inp.disabled=true; $("#go").textContent="✓"; };
+    const submit=()=>{ if(solved)return; const n=numFrom(inp); if(isNaN(n)){inp.focus();return;}
+      if(Math.abs(n-ans)<=Math.abs(ans)*0.02){ showFB(); }
+      else { miss++; run.misses++; sfx.bad(); buzz([40,40,40]); $("#fld").classList.add("no"); setTimeout(()=>{const _f=$("#fld");if(_f)_f.classList.remove("no");},420);
+        if(miss>=2){ const r=$("#reveal"); r.textContent="stuck? reveal the answer"; r.onclick=()=>{ inp.value=Math.round(ans); showFB(); }; }
+        toast("Not quite — check the units"); inp.select(); } };
+    $("#go").onclick=submit; inp.addEventListener("keydown",e=>{if(e.key==="Enter")submit();});
+    $("#reveal").onclick=()=>{ if(!solved) toast(val(step.work)||"Apply each input in turn"); };
+  };
+}
+
+/* b) PREDICT — tap the direction (learning beat, unscored) */
+function renderPredict(step,body){
+  const why=val(step.why)||"";
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${val(step.q)}</div>
+    <div class="predrow">
+      <button class="predbtn up" data-d="up"><span class="ar">▲</span>Higher</button>
+      <button class="predbtn dn" data-d="down"><span class="ar">▼</span>Lower</button>
+    </div><div id="fbslot"></div>`;
+  body.appendChild(wrap);
+  let done=false;
+  wrap.querySelectorAll(".predbtn").forEach(b=>{ b.onclick=()=>{ if(done)return; done=true;
+    const correct=b.dataset.d===step.dir;
+    wrap.querySelectorAll(".predbtn").forEach(x=>{ if(x.dataset.d===step.dir)x.classList.add("right"); else{ x.classList.add("dim"); if(x===b)x.classList.add("wrong"); } });
+    const fb=document.createElement("div"); fb.className="fb "+(correct?"good":"bad");
+    fb.innerHTML=`<span class="lbl">${correct?"✓ Right direction":"✗ Other way"}</span>${why}`;
+    $("#fbslot").appendChild(fb); correct?sfx.good():sfx.bad(); buzz(correct?20:[40,40,40]); contBtn(fb); }; });
+}
+
+/* c) CASCADE — tap the nodes that move, then their directions (judgement-scored on the set) */
+function renderCascade(step,body){
+  run.totCh++;
+  const why=val(step.why)||"", affected=step.affected, dirs=step.dirs||{};
+  const nodes=["metal","revenue","opex","margin","fcf","npv","equity","perShare"];
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${val(step.q)}</div>
+    <div class="subq">Tap every node that moves</div><div class="ngrid" id="ngrid"></div>
+    <button class="btn p" id="cascCheck">Check the cascade →</button><div id="cascSlot"></div>`;
+  body.appendChild(wrap);
+  const Gr=$("#ngrid"), sel=new Set(); let checked=false;
+  nodes.forEach(k=>{ const c=document.createElement("div"); c.className="ncell"; c.dataset.k=k;
+    c.innerHTML=`<div class="nk">node</div><div class="nm">${NODE_NAMES[k]}</div>`;
+    c.onclick=()=>{ if(checked)return; if(sel.has(k)){sel.delete(k);c.classList.remove("sel");}else{sel.add(k);c.classList.add("sel");} };
+    Gr.appendChild(c); });
+  $("#cascCheck").onclick=()=>{
+    if(checked)return; checked=true;
+    const exact=sel.size===affected.length && affected.every(k=>sel.has(k));
+    if(exact) run.goodCh++;
+    Gr.querySelectorAll(".ncell").forEach(c=>{ const k=c.dataset.k; c.classList.remove("sel"); const a=affected.includes(k), p=sel.has(k);
+      c.classList.add(a&&p?"hit":a&&!p?"missed":!a&&p?"falsep":"dimx"); });
+    $("#cascCheck").style.display="none"; exact?sfx.good():sfx.bad(); buzz(exact?20:[40,40,40]);
+    const slot=$("#cascSlot");
+    slot.innerHTML=`<div class="subq">Which way does each move?</div><div id="dirs"></div><div id="cascFb"></div>`;
+    const D=$("#dirs"), state={};
+    affected.forEach(k=>{ const row=document.createElement("div"); row.className="dirrow";
+      row.innerHTML=`<span class="dn">${NODE_NAMES[k]}</span>
+        <button class="dirbtn up" data-k="${k}" data-d="up">▲</button>
+        <button class="dirbtn dn" data-k="${k}" data-d="down">▼</button>`; D.appendChild(row); });
+    let dn=0;
+    D.querySelectorAll(".dirbtn").forEach(b=>{ b.onclick=()=>{ const k=b.dataset.k; if(state[k]!==undefined)return; state[k]=b.dataset.d;
+      D.querySelectorAll('.dirbtn[data-k="'+k+'"]').forEach(x=>{ x.disabled=true; if(x.dataset.d===dirs[k])x.classList.add("correct"); }); b.classList.add("on");
+      if(++dn===affected.length){ const fb=document.createElement("div"); fb.className="fb "+(exact?"good":"bad");
+        fb.innerHTML=`<span class="lbl">${exact?"✓ Exact cascade":"Close — green shows the real cascade"}</span>${why}`; $("#cascFb").appendChild(fb); contBtn(fb); } }; });
+  };
+}
+
+/* d) INVERSE — back-solve an input from a target */
+function inverseSolve(step){
+  if(step.solveFor==="price") return ((step.target*IN.shares + IN.netDebt)/base.annuity + IN.sustainingCapex + base.opex)*1e6/base.metal;
+  return base[step.solveFor];
+}
+function inverseWork(step,ans){
+  if(step.solveFor==="price"){ const eq=step.target*IN.shares, npv=eq+IN.netDebt, fcf=npv/base.annuity, rev=fcf+IN.sustainingCapex+base.opex;
+    return "A$"+step.target.toFixed(2)+"/sh × "+IN.shares+"m = A$"+Math.round(eq)+"m equity → +A$"+IN.netDebt+"m debt = A$"+Math.round(npv)+"m NPV → ÷"+base.annuity.toFixed(2)+" = A$"+Math.round(fcf)+"m FCF → +capex +opex = A$"+Math.round(rev)+"m rev → ÷"+Math.round(base.metal).toLocaleString()+"t = A$"+Math.round(ans).toLocaleString()+"/t"; }
+  return "";
+}
+function renderInverse(step,body){
+  const why=val(step.why)||"", ans=inverseSolve(step), workStr=inverseWork(step,ans);
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${val(step.q)}</div>
+    <div class="inputrow"><div class="field" id="fld"><span class="pre">${step.pre||""}</span>
+      <input id="inp" inputmode="decimal" autocomplete="off" placeholder="?" /><span class="unit">${step.unit||""}</span></div>
+      <button class="submit" id="go">Solve</button></div><div class="mini" id="reveal">show the back-solve</div><div id="fbslot"></div>`;
+  body.appendChild(wrap);
+  const inp=$("#inp"); setTimeout(()=>inp.focus(),120); let solved=false, miss=0;
+  const showFB=()=>{ $("#fld").classList.add("ok"); solved=true;
+    const fb=document.createElement("div"); fb.className="fb good"; fb.innerHTML=`<span class="lbl">✓ ${step.node}</span><div class="work">${workStr}</div>${why}`;
+    $("#fbslot").innerHTML=""; $("#fbslot").appendChild(fb); sfx.good(); buzz(20); contBtn(fb);
+    $("#go").disabled=true; inp.disabled=true; $("#go").textContent="✓"; };
+  const submit=()=>{ if(solved)return; const n=numFrom(inp); if(isNaN(n)){inp.focus();return;}
+    if(Math.abs(n-ans)<=Math.abs(ans)*0.03){ showFB(); }
+    else { miss++; run.misses++; sfx.bad(); buzz([40,40,40]); $("#fld").classList.add("no"); setTimeout(()=>{const _f=$("#fld");if(_f)_f.classList.remove("no");},420);
+      if(miss>=2){ const r=$("#reveal"); r.textContent="stuck? reveal the answer"; r.onclick=()=>{ inp.value=Math.round(ans); showFB(); }; }
+      toast("Work backwards from the target"); inp.select(); } };
+  $("#go").onclick=submit; inp.addEventListener("keydown",e=>{if(e.key==="Enter")submit();});
+  $("#reveal").onclick=()=>{ if(!solved) toast("Back-solve from the per-share target"); };
+}
+
+/* e) AUDIT — find the one wrong line */
+function renderAudit(step,body){
+  const why=val(step.why)||"", lines=val(step.lines);
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${val(step.q)}</div>
+    <div class="subq">Tap the line with the error</div><div id="alines"></div><div id="auditFb"></div>`;
+  body.appendChild(wrap);
+  const A=$("#alines"); let done=false;
+  lines.forEach((ln,i)=>{ const el=document.createElement("div"); el.className="auditline"; el.textContent=ln.t;
+    el.onclick=()=>{ if(done)return;
+      if(ln.ok){ run.misses++; sfx.bad(); buzz([40,40,40]); shake(el); toast("That line checks out — look again"); return; }
+      done=true; A.querySelectorAll(".auditline").forEach((x,j)=>{ x.classList.add(lines[j].ok?"dim":"bad"); }); el.classList.remove("dim");
+      const fb=document.createElement("div"); fb.className="fb good"; fb.innerHTML=`<span class="lbl">✓ Found it</span><div class="work">${ln.fix}</div>${why}`;
+      $("#auditFb").appendChild(fb); sfx.good(); buzz(20); contBtn(fb); };
+    A.appendChild(el); });
+}
+
+/* f) BLANK — sequential recall capstone, no chips */
+function renderBlank(step,body){
+  const why=val(step.why)||"", chain=step.chain;
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="node">${step.node}</div><div class="q">${val(step.q)}</div>
+    <div class="subq">No chips. Rebuild it from memory.</div><div id="blankSlot"></div>`;
+  body.appendChild(wrap);
+  const slot=$("#blankSlot"); let idx=0;
+  function ask(){
+    if(idx>=chain.length){ return finishBlank(); }
+    const k=chain[idx], meta=CHAIN_META[k], ans=base[k];
+    slot.innerHTML=`<div class="node" style="margin-top:6px">${idx+1} / ${chain.length}</div>
+      <div class="q" style="font-size:19px">${meta.label} <span style="color:var(--mut);font-size:14px">(${meta.unit})</span>?</div>
+      <div class="inputrow"><div class="field" id="fld"><span class="pre">${meta.pre}</span>
+        <input id="inp" inputmode="decimal" autocomplete="off" placeholder="?" /><span class="unit">${meta.unit}</span></div>
+        <button class="submit" id="go">Lock</button></div><div class="mini" id="reveal">stuck?</div>`;
+    const inp=$("#inp"); setTimeout(()=>inp.focus(),100); let miss=0, solved=false;
+    const ok=()=>{ if(solved)return; solved=true; M[k]=ans; renderStrip(); sfx.good(); buzz(20); idx++; setTimeout(ask,200); };
+    const submit=()=>{ if(solved)return; const n=numFrom(inp); if(isNaN(n)){inp.focus();return;}
+      if(Math.abs(n-ans)<=Math.abs(ans)*0.03){ $("#fld").classList.add("ok"); ok(); }
+      else { miss++; run.misses++; sfx.bad(); buzz([40,40,40]); $("#fld").classList.add("no"); setTimeout(()=>{const _f=$("#fld");if(_f)_f.classList.remove("no");},420);
+        if(miss>=2){ const r=$("#reveal"); r.textContent="reveal the answer"; r.onclick=()=>{ inp.value=(meta.unit==="A$"?ans.toFixed(2):Math.round(ans)); $("#fld").classList.add("ok"); ok(); }; }
+        toast("Not quite — recall the inputs"); inp.select(); } };
+    $("#go").onclick=submit; inp.addEventListener("keydown",e=>{if(e.key==="Enter")submit();});
+    $("#reveal").onclick=()=>toast("Recall it from the brief you read");
+  }
+  function finishBlank(){
+    slot.innerHTML=`<div class="subq">The whole napkin — from memory</div><div class="napkin" id="napkin"></div><div id="blankFb"></div>`;
+    const N=$("#napkin");
+    chain.forEach(k=>{ const r=document.createElement("div"); r.className="nr";
+      r.innerHTML=`<span class="k">${CHAIN_META[k].label}</span><span class="v">${fmtKey(k,base[k])}</span>`; N.appendChild(r); });
+    const fb=document.createElement("div"); fb.className="fb good"; fb.innerHTML=`<span class="lbl">✓ Rebuilt from memory</span>${why}`;
+    $("#blankFb").appendChild(fb); sfx.win(); buzz([20,60,20]); contBtn(fb,"Finish →");
+  }
+  ask();
+}
+
 /* ---- FEATURE 2: sensitivity sliders + predict-the-tornado ---- */
 function renderSensitivity(step,body){
-  const base = computeModel(BASE_INPUTS);
-  const inputs = {...BASE_INPUTS};
+  const IN=run.IN, base=run.base;     // randomised run is the single source of truth
+  const inputs = {...IN};
   const SLIDERS = [
     {key:"price",        nm:"Price",         min:6000, max:14000, step:100},
     {key:"grade",        nm:"Grade",         min:1.5,  max:4.5,   step:0.1},
@@ -664,10 +1022,10 @@ function renderSensitivity(step,body){
   SLIDERS.forEach(s=>{
     const row=document.createElement("div"); row.className="slider";
     row.innerHTML=`<div class="top"><span class="nm">${s.nm}</span><span class="vl" id="vl_${s.key}"></span></div>
-      <input type="range" id="sl_${s.key}" min="${s.min}" max="${s.max}" step="${s.step}" value="${BASE_INPUTS[s.key]}">`;
+      <input type="range" id="sl_${s.key}" min="${s.min}" max="${s.max}" step="${s.step}" value="${IN[s.key]}">`;
     SL.appendChild(row);
     const inp=row.querySelector("input");
-    $("#vl_"+s.key).textContent=label(s.key, BASE_INPUTS[s.key]);
+    $("#vl_"+s.key).textContent=label(s.key, IN[s.key]);
     inp.addEventListener("input",()=>{ inputs[s.key]=+inp.value; $("#vl_"+s.key).textContent=label(s.key,+inp.value); recompute(); });
   });
   function paint(vEl,dEl,val,baseVal,f){
@@ -683,8 +1041,8 @@ function renderSensitivity(step,body){
     paint($("#snPs"), $("#snPsD"),  m.perShare, base.perShare, v=>"A$"+v.toFixed(2));
   }
   $("#snReset").onclick=()=>{
-    Object.assign(inputs,BASE_INPUTS);
-    SLIDERS.forEach(s=>{ $("#sl_"+s.key).value=BASE_INPUTS[s.key]; $("#vl_"+s.key).textContent=label(s.key,BASE_INPUTS[s.key]); });
+    Object.assign(inputs,IN);
+    SLIDERS.forEach(s=>{ $("#sl_"+s.key).value=IN[s.key]; $("#vl_"+s.key).textContent=label(s.key,IN[s.key]); });
     recompute(); sfx.good();
   };
   recompute();
@@ -717,9 +1075,9 @@ function renderSensitivity(step,body){
     if(good) run.goodCh++;
 
     const rows=LEVERS.map(L=>{
-      const hi={...BASE_INPUTS}, lo={...BASE_INPUTS};
-      if(L.kind==="pp"){ hi[L.key]=BASE_INPUTS[L.key]+2; lo[L.key]=BASE_INPUTS[L.key]-2; }
-      else { hi[L.key]=BASE_INPUTS[L.key]*1.2; lo[L.key]=BASE_INPUTS[L.key]*0.8; }
+      const hi={...IN}, lo={...IN};
+      if(L.kind==="pp"){ hi[L.key]=IN[L.key]+2; lo[L.key]=IN[L.key]-2; }
+      else { hi[L.key]=IN[L.key]*1.2; lo[L.key]=IN[L.key]*0.8; }
       const a=computeModel(hi).npv, b=computeModel(lo).npv;
       return {nm:L.nm, up:Math.max(a,b)-base.npv, down:base.npv-Math.min(a,b), swing:Math.max(a,b)-Math.min(a,b)};
     }).sort((x,y)=>y.swing-x.swing);
@@ -768,7 +1126,7 @@ function showDebrief(){
       <div class="dbrow"><span class="k">Calc misses</span><span class="v">${run.misses}</span></div>
       <div class="dbrow"><span class="k">Judgement calls</span><span class="v">${run.goodCh}/${run.totCh}</span></div>
     </div>
-    <div class="callout"><b>What moved the model</b><br>${d.sens.map(([a,b])=>`${a} — ${b}`).join("<br>")}</div>
+    <div class="callout"><b>What moved the model</b><br>${(val(d.sens)).map(([a,b])=>`${a} — ${b}`).join("<br>")}</div>
     <div class="note"><span class="lbl">The intuition</span>${d.note}</div>
     <button class="btn p" id="ovNext">Back to the worlds →</button>`;
   $("#ov").classList.add("show");
